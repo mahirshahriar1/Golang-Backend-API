@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	"github.com/mahirshahriar1/Golang-Backend-API/config"
 	"github.com/mahirshahriar1/Golang-Backend-API/service/auth"
 	"github.com/mahirshahriar1/Golang-Backend-API/types"
 	"github.com/mahirshahriar1/Golang-Backend-API/utils"
@@ -49,7 +50,14 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "login successful"})
+	secret := []byte(config.Envs.JWTSecret)
+	token, err := auth.CreateJWT(secret, u.ID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, map[string]string{"token": token})
 
 }
 
